@@ -1,265 +1,165 @@
-// import 'package:first_project/check_box.dart';
-// import 'package:flutter/material.dart';
-// import 'package:hive_flutter/hive_flutter.dart';
-// import 'package:first_project/coffe_repo.dart';
-// import 'package:first_project/note_page.dart';
-// import 'package:first_project/json_coffe.dart';
-
-// // void main() async {
-// //   WidgetsFlutterBinding.ensureInitialized();
-// //   await Hive.initFlutter();
-// //   await Hive.openBox('counterBox');
-// //   runApp(MyApp());
-// // }
-
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: Python(), //
-//     );
-//   }
-// }
-
-
-
-// // class CounterPage extends StatefulWidget {
-// //   @override
-// //   _CounterPageState createState() => _CounterPageState();
-// // }
-
-// // class _CounterPageState extends State<CounterPage> {
-// //   final box = Hive.box('counterBox');
-// //   int counter = 0;
-
-// //   @override
-// //   void initState() {
-// //     super.initState();
-// //     counter = box.get('count', defaultValue: 0);
-// //   }
-
-// //   void updateCounter(int value) {
-// //     setState(() {
-// //       counter += value;
-// //       box.put('count', counter);
-// //     });
-// //   }
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return Scaffold(
-// //       appBar: AppBar(title: Text('Счётчик Hive')),
-// //       body: Center(
-// //         child: Column(
-// //           mainAxisAlignment: MainAxisAlignment.center,
-// //           children: [
-// //             Text('Счёт:', style: TextStyle(fontSize: 24)),
-// //             Text('$counter', style: TextStyle(fontSize: 48)),
-// //             Row(
-// //               mainAxisAlignment: MainAxisAlignment.center,
-// //               children: [
-// //                 ElevatedButton(
-// //                   onPressed: () => updateCounter(-1),
-// //                   child: Text('-'),
-// //                 ),
-// //                 SizedBox(width: 20),
-// //                 ElevatedButton(
-// //                   onPressed: () => updateCounter(1),
-// //                   child: Text('+'),
-// //                 ),
-// //               ],
-// //             ),
-// //           ],
-// //         ),
-// //       ),
-// //     );
-// //   }
-// // }
-
-// import 'package:flutter/material.dart';
-
-// class HomePage extends StatelessWidget {
-//   const HomePage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Scaffold(
-//       body: Center(
-//         child: Text(
-//           context.watch<CounterProvider>().count.toString,
-//           style: const TextStyle(fontSize: 40.0),
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(onPressed: () {
-//         context.read<CounterProvider>().increment();
-//       }),
-//       bottomNavigationBar: const HomePage(),
-//     );
-//   }
-// }
-
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-void main() {
-  runApp(MyApp());
-}
-
-class Movie {
-  final String title;
-  final String? posterURL;
-  final int? year;
-  final String? plot;
-
-  Movie({required this.title, this.posterURL, this.year, this.plot});
-
-  factory Movie.fromJson(Map<String, dynamic> json) {
-    return Movie(
-      title: json['title'] ?? 'No title',
-      posterURL: json['posterURL'],
-      year: json['year'],
-      plot: json['plot'],
-    );
-  }
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Horror Movies',
-      theme: ThemeData.dark(),
-      home: MovieListScreen(),
+      title: 'Book App Onboarding',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'SF Pro Display',
+        scaffoldBackgroundColor: Colors.white,
+        primaryColor: Color(0xFF6C5DD3),
+      ),
+      home: OnboardingScreen(),
     );
   }
 }
 
-class MovieListScreen extends StatelessWidget {
-  Future<List<Movie>> fetchMovies() async {
-    final response = await http.get(Uri.parse('https://api.sampleapis.com/movies/horror'));
-    if (response.statusCode == 200) {
-      List jsonData = json.decode(response.body);
-      return jsonData.map((e) => Movie.fromJson(e)).toList();
-    } else {
-      throw Exception('Failed to load movies');
-    }
-  }
+class OnboardingScreen extends StatefulWidget {
+  @override
+  _OnboardingScreenState createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _controller = PageController();
+  int _currentPage = 0;
+
+  final List<Map<String, String>> onboardingData = [
+    {
+      'title': 'Now reading books\nwill be easier',
+      'subtitle':
+          'Discover new worlds, join a vibrant\nreading community. Start your reading\nadventure effortlessly with us.',
+      'button': 'Continue',
+    },
+    {
+      'title': 'Your Bookish Soulmate\nAwaits',
+      'subtitle':
+          'Let us be your guide to the perfect read.\nDiscover books tailored to your tastes\nfor a truly rewarding experience.',
+      'button': 'Get Started',
+    },
+    {
+      'title': 'Start your adventure',
+      'subtitle':
+          'Ready to embark on a quest for\ninspiration and knowledge? Your\nadventure begins now. Let’s go!',
+      'button': 'Get Started',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Horror Movies')),
-      body: FutureBuilder<List<Movie>>(
-        future: fetchMovies(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
-            return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError)
-            return Center(child: Text('Error: ${snapshot.error}'));
+    final primaryColor = Theme.of(context).primaryColor;
 
-          final movies = snapshot.data!;
-          return GridView.builder(
-            padding: EdgeInsets.all(12),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.65,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-            ),
-            itemCount: movies.length,
-            itemBuilder: (context, index) {
-              final movie = movies[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => MovieDetailScreen(movie: movie)),
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                onPageChanged: (index) {
+                  setState(() => _currentPage = index);
+                },
+                itemCount: onboardingData.length,
+                itemBuilder: (context, index) {
+                  final data = onboardingData[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'Skip',
+                              style: TextStyle(color: primaryColor),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Container(
+                          height: 250,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Center(child: Icon(Icons.image, size: 100, color: Colors.grey)),
+                        ),
+                        SizedBox(height: 40),
+                        Text(
+                          data['title']!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          data['subtitle']!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            height: 1.6,
+                            color: Colors.black.withOpacity(0.6),
+                          ),
+                        ),
+                        Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            onboardingData.length,
+                            (i) => Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4),
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _currentPage == i
+                                    ? primaryColor
+                                    : Colors.grey.shade300,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            minimumSize: Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(data['button']!),
+                        ),
+                        SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Sign in',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                      ],
+                    ),
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: movie.posterURL != null
-                        ? DecorationImage(
-                            image: NetworkImage(movie.posterURL!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                    alignment: Alignment.bottomLeft,
-                    padding: EdgeInsets.all(12),
-                    child: Text(
-                      movie.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class MovieDetailScreen extends StatelessWidget {
-  final Movie movie;
-
-  const MovieDetailScreen({required this.movie});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(movie.title)),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (movie.posterURL != null)
-            Image.network(movie.posterURL!, height: 300, fit: BoxFit.cover),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Title: ${movie.title}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                if (movie.year != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text('Year: ${movie.year}', style: TextStyle(fontSize: 16)),
-                  ),
-                if (movie.plot != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: Text(movie.plot!, style: TextStyle(fontSize: 16)),
-                  ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
-
-
-
